@@ -55,8 +55,20 @@ class GyroSensorExt:
 
         ``target_deg`` may be any real number; subsequent readings track the sensor
         from there and are normalized into (-180.0, 180.0].
+
+        Retries until confirmed: immediately after the firmware applies the reset
+        the reported yaw must equal ``target_deg`` (normalized), so a small angular
+        deviation is used as confirmation.
         """
-        await self.pup_device.send_cmd(f"HEADING={target_deg}")
+        t = ((target_deg + 180.0) % 360.0) - 180.0
+        if t == -180.0:
+            t = 180.0
+        while True:
+            await self.pup_device.send_cmd(f"HEADING={target_deg}")
+            await wait(50)
+            diff = abs(((await self.yaw() - t) + 180.0) % 360.0 - 180.0)
+            if diff < 0.5:
+                break
 
     async def calibration_start(self):
         """ Start the yaw-scale calibration process. Turn the IMU exactly one full 360 deg turn, then call ``calibration_stop()``. """
