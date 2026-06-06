@@ -14,8 +14,8 @@ class GyroSensorExt:
     CALIB_RUNNING_MASK = 1 << 7
     CALIB_RUNNING = 1 << 7
 
-    # Firmware packs yaw as int16 centi-degrees (degrees * 100), little-endian.
-    YAW_SCALE = 100
+    # Firmware packs heading as int16 centi-degrees (degrees * 100), little-endian.
+    HEADING_SCALE = 100
 
     def __init__(self, pup_device: FloorProV3, ext_port=1):
         # TODO we require FloorProV3 at this time because it is currently the only PUPDevice that supports the necessary ext_port_data() method;
@@ -32,13 +32,13 @@ class GyroSensorExt:
                 f"Data from extension port {self.ext_port} does not match expected IMU sensor format.")
         return data
 
-    async def yaw(self):
-        """ Returns the yaw (heading) in degrees as a float in the range (-180.0, 180.0]. """
+    async def heading(self):
+        """ Returns the current heading in degrees as a float in the range (-180.0, 180.0]. """
         data = await self.data()
         raw = data[0] | (data[1] << 8)
         if raw & 0x8000:
             raw -= 0x10000
-        return raw / self.YAW_SCALE
+        return raw / self.HEADING_SCALE
 
     async def error(self) -> bool:
         """ Returns True if the IMU is reporting an error / no valid data. """
@@ -47,8 +47,8 @@ class GyroSensorExt:
 
     async def str(self):
         data = await self.data()
-        yaw = await self.yaw()
-        return f"GyroSensorExt(ext_port={self.ext_port}, yaw={yaw:.2f} deg, {data[4]:08b})"
+        heading = await self.heading()
+        return f"GyroSensorExt(ext_port={self.ext_port}, heading={heading:.2f} deg, {data[4]:08b})"
 
     async def set_heading(self, target_deg: float):
         """ Reset the reported heading (yaw) to ``target_deg``. Session-only — not persisted across reboots.
@@ -57,8 +57,8 @@ class GyroSensorExt:
         from there and are normalized into (-180.0, 180.0].
 
         Retries until confirmed: immediately after the firmware applies the reset
-        the reported yaw must equal ``target_deg`` (normalized), so a small angular
-        deviation is used as confirmation.
+        the reported heading must equal ``target_deg`` (normalized), so a small
+        angular deviation is used as confirmation.
         """
         t = ((target_deg + 180.0) % 360.0) - 180.0
         if t == -180.0:
@@ -66,7 +66,7 @@ class GyroSensorExt:
         while True:
             await self.pup_device.send_cmd(f"HEADING={target_deg}")
             await wait(50)
-            diff = abs(((await self.yaw() - t) + 180.0) % 360.0 - 180.0)
+            diff = abs(((await self.heading() - t) + 180.0) % 360.0 - 180.0)
             if diff < 0.5:
                 break
 

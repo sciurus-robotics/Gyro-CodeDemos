@@ -6,7 +6,7 @@ extension connector.
 
 ## Overview
 
-`GyroSensorExt` reads yaw (heading) data from a BNO086 IMU plugged into one of
+`GyroSensorExt` reads heading data from a BNO086 IMU plugged into one of
 the two extension slots on the LP-FloorPro-V3 sensor. It runs on a LEGO
 Inventor or SPIKE Prime hub using [Pybricks](https://pybricks.com).
 
@@ -26,7 +26,7 @@ driver decodes this and exposes a simple async API.
 | `sr_lp_gyro_ext.py` | `GyroSensorExt` driver |
 | `floor_pro_v3.py` | Symlink into the LP-FloorPro-V3-CodeDemos submodule |
 | `demo.py` | Heading display — left/right button resets heading to 0 |
-| `demo_calibration.py` | Yaw-scale calibration procedure |
+| `demo_calibration.py` | Heading-scale calibration procedure |
 
 ## API
 
@@ -38,7 +38,7 @@ floor_pro = FloorProV3(port=Port.D)
 gyro = GyroSensorExt(pup_device=floor_pro, ext_port=FloorProV3.EXT2)
 ```
 
-### `await gyro.yaw() -> float`
+### `await gyro.heading() -> float`
 Returns the current heading in degrees, normalized to (−180.0, +180.0].
 
 ### `await gyro.error() -> bool`
@@ -50,7 +50,7 @@ subsequent readings track the sensor from there and are normalized to
 (−180.0, +180.0]. Session-only — not persisted across reboots.
 
 ### `await gyro.calibration_start()`
-Starts the yaw-scale calibration procedure. After calling this, turn the IMU
+Starts the heading-scale calibration procedure. After calling this, turn the IMU
 exactly one full 360 ° turn, then call `calibration_stop()`.
 
 ### `await gyro.calibration_stop()`
@@ -61,10 +61,10 @@ to the firmware's NVS storage.
 
 ### `demo.py` — heading reset
 
-Displays the current yaw on the hub's 5×5 matrix. Press **left** or **right**
+Displays the current heading on the hub's 5×5 matrix. Press **left** or **right**
 to zero the heading at any time.
 
-### `demo_calibration.py` — yaw-scale calibration
+### `demo_calibration.py` — heading-scale calibration
 
 Press **right** to start calibration, turn the robot exactly one full
 360 ° turn, then press **left** to stop. The corrected scale factor is saved

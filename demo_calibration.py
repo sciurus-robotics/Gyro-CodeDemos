@@ -25,7 +25,7 @@ async def show_data_loop():
 async def calibration_loop():
     while True:
         print(
-            f"Press RIGHT to start yaw-scale calibration of extension port {EXT_PORT}.")
+            f"Press RIGHT to start heading-scale calibration of extension port {EXT_PORT}.")
         while True:
             if Button.RIGHT in hub.buttons.pressed():
                 break

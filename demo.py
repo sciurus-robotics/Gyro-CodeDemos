@@ -15,8 +15,8 @@ hub = InventorHub()
 
 async def display_loop():
     while True:
-        yaw = await lp_gyro_ext.yaw()
-        v = int(yaw)
+        heading = await lp_gyro_ext.heading()
+        v = int(heading)
         hub.display.number(v % 100 if v >= 0 else -((-v) % 100))
         await wait(100)
 
