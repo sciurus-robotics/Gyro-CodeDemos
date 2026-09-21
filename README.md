@@ -1,79 +1,31 @@
-# LP-Gyro-Extension
+# Gyro — Code Demos
 
-Driver and demos for a BNO086 IMU connected to a LEGO Powered Up port via the
-[LP-FloorPro-V3](https://github.com/sciurus-robotics/LP-FloorPro-V3-CodeDemos)
-extension connector.
+Driver code and demo programs for the **Gyro** by Sciurus Robotics: a BNO086
+inertial measurement unit reporting roll, pitch and yaw (heading), plugged into
+an extension port of the [FloorPro](https://github.com/sciurus-robotics/FloorPro-CodeDemos)
+line sensor.
 
-## Overview
+Product information, documentation and firmware downloads: **https://sciro.ch**
 
-`GyroSensorExt` reads heading data from a BNO086 IMU plugged into one of
-the two extension slots on the LP-FloorPro-V3 sensor. It runs on a LEGO
-Inventor or SPIKE Prime hub using [Pybricks](https://pybricks.com).
+## Which folder is yours?
 
-The firmware packs yaw as a signed 16-bit integer in centi-degrees
-(range −180.00 ° … +180.00 °) inside the 5-byte extension slot pack. The
-driver decodes this and exposes a simple async API.
+| Your hub | Protocol | Folder |
+|---|---|---|
+| LEGO Prime / Inventor hub with Pybricks | LUMP (LEGO UART sensor protocol) | [`lump/`](lump/) |
+| PeakHub | PUMP (Power UART Multiplex Protocol) | [`pump/`](pump/) |
 
-## Hardware setup
+Over LUMP the gyro's heading rides inside the FloorPro's sensor message; over
+PUMP it is a stream of its own with roll, pitch and yaw. The demos in both
+folders cover the same ground: heading on the hub display with a button reset,
+plus the heading-scale calibration on the LUMP side.
 
-- LP-FloorPro-V3 sensor connected to a hub port (default: `Port.D`)
-- BNO086 IMU plugged into extension slot 1 or 2 (default: `EXT2`)
+## Requirements
 
-## Files
+- `lump/`: [Pybricks](https://pybricks.com) firmware on the LEGO hub and
+  [`pybricksdev`](https://github.com/pybricks/pybricksdev) to run scripts.
+- `pump/`: a PeakHub and the [`scirodev`](https://pypi.org/project/scirodev/)
+  package (`pip install scirodev`).
 
-| File | Description |
-|------|-------------|
-| `sr_lp_gyro_ext.py` | `GyroSensorExt` driver |
-| `floor_pro_v3.py` | Symlink into the LP-FloorPro-V3-CodeDemos submodule |
-| `demo.py` | Heading display — left/right button resets heading to 0 |
-| `demo_calibration.py` | Heading-scale calibration procedure |
+## License
 
-## API
-
-```python
-from floor_pro_v3 import FloorProV3
-from sr_lp_gyro_ext import GyroSensorExt
-
-floor_pro = FloorProV3(port=Port.D)
-gyro = GyroSensorExt(pup_device=floor_pro, ext_port=FloorProV3.EXT2)
-```
-
-### `await gyro.heading() -> float`
-Returns the current heading in degrees, normalized to (−180.0, +180.0].
-
-### `await gyro.error() -> bool`
-Returns `True` when the IMU reports no valid data.
-
-### `await gyro.set_heading(target_deg: float)`
-Resets the reported heading to `target_deg`. Any real number is accepted;
-subsequent readings track the sensor from there and are normalized to
-(−180.0, +180.0]. Session-only — not persisted across reboots.
-
-### `await gyro.calibration_start()`
-Starts the heading-scale calibration procedure. After calling this, turn the IMU
-exactly one full 360 ° turn, then call `calibration_stop()`.
-
-### `await gyro.calibration_stop()`
-Ends calibration, computes the per-revolution gain correction, and persists it
-to the firmware's NVS storage.
-
-## Demos
-
-### `demo.py` — heading reset
-
-Displays the current heading on the hub's 5×5 matrix. Press **left** or **right**
-to zero the heading at any time.
-
-### `demo_calibration.py` — heading-scale calibration
-
-Press **right** to start calibration, turn the robot exactly one full
-360 ° turn, then press **left** to stop. The corrected scale factor is saved
-and applied automatically on every subsequent boot.
-
-## Submodule
-
-`LP-FloorPro-V3-CodeDemos` is a git submodule. After cloning, run:
-
-```sh
-git submodule update --init
-```
+MIT, see [LICENSE](LICENSE).
